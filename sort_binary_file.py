@@ -1,11 +1,10 @@
 """
-This program sorts numbers in a binary file and prints them to the console. The numbers are represented as 64-bit signed integers (signed long long).
+This program sorts numbers in a binary file and prints them to the console. The numbers are represented as 64-bit signed integers.
 
 Algorithm:
-
 1) Sorting the Binary File:
-    + Numbers are read from the file in chunks of 64-bit (8 bytes).
-    + An insertion sort algorithm is applied directly within the file without loading all data into memory.
+    + Numbers are read from the file in chunks of 64-bit;
+    + An insertion sort algorithm is applied directly within the file without loading all data into memory;
     + Numbers are moved within the file by overwriting.
 
 2) Printing the File Contents:
@@ -17,13 +16,12 @@ Input File:
 Output:
 + The program outputs the sorted sequence of numbers to the console.
 
-Эта программа выполняет сортировку чисел в бинарном файле и выводит их на экран. Числа представлены в формате 64-битных целых чисел (signed long long).
+Эта программа выполняет сортировку чисел в бинарном файле и выводит их на экран. Числа представлены в формате 64-битных целых чисел.
 
 Алгоритм:
-
 1) Сортировка бинарного файла:
-    + Числа считываются из файла блоками по размеру 64-битного числа (8 байт).
-    + Используется модификация алгоритма вставок (insertion sort) для сортировки чисел прямо в файле, без загрузки всех данных в память.
+    + Числа считываются из файла блоками по размеру 64-битного числа;
+    + Используется модификация алгоритма вставок (insertion sort) для сортировки чисел прямо в файле, без загрузки всех данных в память;
     + Числа перемещаются внутри файла путем перезаписи.
 
 2) Вывод содержимого файла:
@@ -44,39 +42,41 @@ def sort_binary_file(filename):
     with open(filename, "r+b") as file:
         file.seek(0, 2)
         file_size = file.tell()
-        count =file_size // num_size
-    
-        for i in range (1, count):
-            file.seek(i * num_size, 0)
-            current = struct.unpack('q', file.read(num_size))[0]
+        count = file_size // num_size
 
-            j = i-1
+        for i in range(1, count):
+            file.seek(i * num_size)
+            current_number = struct.unpack('q', file.read(num_size))[0]
+
+            j = i - 1
 
             while j >= 0:
-                file.seek(j*num_size)
+                file.seek(j * num_size)
                 previous_number = struct.unpack('q', file.read(num_size))[0]
 
-            if previous_number > current:
-                file.seek((j+1)*num_size)
-                file.write(struct.pack('q', previous_number))
-                j = j-1
-            else:
-                break
+                if previous_number > current_number:
+                    file.seek((j + 1) * num_size)
+                    file.write(struct.pack('q', previous_number))
+                    j -= 1
+                else:
+                    break
 
-            file.seek((j+1)*num_size)
-            file.write(struct.pack('q', current))
+            file.seek((j + 1) * num_size)
+            file.write(struct.pack('q', current_number))
+
 
 def print_binary_file(filename):
+    num_size = struct.calcsize('q')
     with open(filename, 'rb') as file:
-        num_size = struct.calcsize('q') # 64
-        chunk=file.read()
-        while chunk:
+        while True:
+            chunk = file.read(num_size)
+            if not chunk:
+                break
             number = struct.unpack('q', chunk)[0]
-            print(number, end=" ")
-            chunk=file.read()
+            print(number, end=' ')
+    print()
 
 filename = "numbers.bin"
 
 sort_binary_file(filename)
-
 print_binary_file(filename)
